@@ -31,7 +31,6 @@ module.exports = function(mongoose) {
     const cacheValue = await client.get(key);
     if (cacheValue) {
       const doc = JSON.parse(cacheValue);
-
       return Array.isArray(doc) ? doc.map(d => new this.model(d)) : new this.model(doc);
     }
 
@@ -61,12 +60,11 @@ module.exports = function(mongoose) {
 
 
       const key = this.getCacheKey();
-      console.log(`[LOG] Serving from cache`,key);
       const cacheValue = await client.get(key);
       if (cacheValue) {
         const doc = JSON.parse(cacheValue);
-  
-        return Array.isArray(doc) ? doc.map(d => new this.model(d)) : new this.model(doc);
+        console.log(`[LOG] Serving from cache`,key);
+        return doc;
       }
   
       const result = await exec.apply(this, arguments);
