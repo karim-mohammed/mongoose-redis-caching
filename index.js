@@ -70,6 +70,7 @@ module.exports = function(mongoose) {
   
       const result = await exec.apply(this, arguments);
       client.set(key, JSON.stringify(result), "EX", this._expire ? this._expire : 60);
+      return result;
     };
 
     Aggregate.prototype.cache = function(time) {
