@@ -54,36 +54,22 @@ module.exports = function(mongoose) {
   function extend(Aggregate) {
     const exec = Aggregate.prototype.exec;
 
-    Aggregate.prototype.exec = function(callback = function() {}) {
+    Aggregate.prototype.exec = async function() {
       if (!this._cache) {
         return exec.apply(this, arguments);
       }
 
       console.log(`[LOG] Serving from cache`);
-      const key = this._key || this.getCacheKey();
-      const ttl = this._expire;
-
-      return new Promise((resolve, reject) => {
-        cache.get(key, (err, cachedResults) => {
-          if (cachedResults) {
-            callback(null, cachedResults);
-            return resolve(cachedResults);
-          }
-
-          exec
-            .call(this)
-            .then(results => {
-              cache.set(key, results, ttl, () => {
-                callback(null, results);
-                resolve(results);
-              });
-            })
-            .catch(err => {
-              callback(err);
-              reject(err);
-            });
-        });
-      });
+      const key = this.getCacheKey();
+      const cacheValue = await client.get(key);
+      if (cacheValue) {
+        const doc = JSON.parse(cacheValue);
+  
+        return Array.isArray(doc) ? doc.map(d => new this.model(d)) : new this.model(doc);
+      }
+  
+      const result = await exec.apply(this, arguments);
+      client.set(key, JSON.stringify(result), "EX", this._expire ? this._expire : 60);
     };
 
     Aggregate.prototype.cache = function(time) {
