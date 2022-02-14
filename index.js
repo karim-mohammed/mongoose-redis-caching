@@ -59,8 +59,9 @@ module.exports = function(mongoose) {
         return await exec.apply(this, arguments);
       }
 
-      console.log(`[LOG] Serving from cache`);
+
       const key = this.getCacheKey();
+      console.log(`[LOG] Serving from cache`,key);
       const cacheValue = await client.get(key);
       if (cacheValue) {
         const doc = JSON.parse(cacheValue);
@@ -83,7 +84,6 @@ module.exports = function(mongoose) {
     };
 
     Aggregate.prototype.getCacheKey = function() {
-      console.log("this._pipeline",this._pipeline)
       return generateKey(this._pipeline);
     };
   }
