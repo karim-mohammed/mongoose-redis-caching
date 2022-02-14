@@ -82,6 +82,7 @@ module.exports = function(mongoose) {
     };
 
     Aggregate.prototype.getCacheKey = function() {
+      console.log("this._pipeline",this._pipeline)
       return generateKey(this._pipeline);
     };
   }
