@@ -22,7 +22,7 @@ module.exports = function(mongoose) {
 
   mongoose.Query.prototype.exec = async function() {
     if (!this._cache) {
-      return exec.apply(this, arguments);
+      return await exec.apply(this, arguments);
     }
     console.log(`[LOG] Serving from cache`);
 
@@ -56,7 +56,7 @@ module.exports = function(mongoose) {
 
     Aggregate.prototype.exec = async function() {
       if (!this._cache) {
-        return exec.apply(this, arguments);
+        return await exec.apply(this, arguments);
       }
 
       console.log(`[LOG] Serving from cache`);
