@@ -1,17 +1,17 @@
 const redis = require("redis");
 const util = require("util");
-const generateKey = require('./generate-key');
+const generateKey = require("./generate-key");
 const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const client = redis.createClient(redisUrl);
 client.get = util.promisify(client.get);
 
 let hasBeenExtended = false;
 
-module.exports = function (mongoose) {
+module.exports = function(mongoose) {
   const exec = mongoose.Query.prototype.exec;
   const aggregate = mongoose.Model.aggregate;
 
-  mongoose.Query.prototype.cache = function (time) {
+  mongoose.Query.prototype.cache = function(time) {
     this._cache = true;
 
     if (time) {
@@ -20,8 +20,7 @@ module.exports = function (mongoose) {
     return this;
   };
 
-
-  mongoose.Query.prototype.exec = async function () {
+  mongoose.Query.prototype.exec = async function() {
     if (!this._cache) {
       return exec.apply(this, arguments);
     }
@@ -41,10 +40,10 @@ module.exports = function (mongoose) {
     return result;
   };
 
-  mongoose.Model.aggregate = function () {
+  mongoose.Model.aggregate = function() {
     const res = aggregate.apply(this, arguments);
 
-    if (!hasBeenExtended && res.constructor && res.constructor.name === 'Aggregate') {
+    if (!hasBeenExtended && res.constructor && res.constructor.name === "Aggregate") {
       extend(res.constructor);
       hasBeenExtended = true;
     }
@@ -55,7 +54,7 @@ module.exports = function (mongoose) {
   function extend(Aggregate) {
     const exec = Aggregate.prototype.exec;
 
-    Aggregate.prototype.exec = function (callback = function () { }) {
+    Aggregate.prototype.exec = function(callback = function() {}) {
       if (!this._cache) {
         return exec.apply(this, arguments);
       }
@@ -73,13 +72,13 @@ module.exports = function (mongoose) {
 
           exec
             .call(this)
-            .then((results) => {
+            .then(results => {
               cache.set(key, results, ttl, () => {
                 callback(null, results);
                 resolve(results);
               });
             })
-            .catch((err) => {
+            .catch(err => {
               callback(err);
               reject(err);
             });
@@ -87,7 +86,7 @@ module.exports = function (mongoose) {
       });
     };
 
-    Aggregate.prototype.cache = function (time) {
+    Aggregate.prototype.cache = function(time) {
       this._cache = true;
 
       if (time) {
@@ -96,9 +95,8 @@ module.exports = function (mongoose) {
       return this;
     };
 
-    Aggregate.prototype.getCacheKey = function () {
+    Aggregate.prototype.getCacheKey = function() {
       return generateKey(this._pipeline);
     };
   }
-
 };

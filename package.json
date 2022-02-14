@@ -8,11 +8,6 @@
     "format": "prettier --tab-width 2 --print-width 100 --write index.js",
     "postversion": "git push && git push --tags"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn format"
-    }
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/pedreviljoen/mongoose-redis-caching.git"
